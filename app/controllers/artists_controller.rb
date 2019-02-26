@@ -1,5 +1,5 @@
 class ArtistsController < ApplicationController
   def index
-    render json:  Artist.all
+    render json:  curr_user.artists
   end
 end

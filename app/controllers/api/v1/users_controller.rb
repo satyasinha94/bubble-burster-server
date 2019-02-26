@@ -2,6 +2,7 @@ class Api::V1::UsersController < ApplicationController
   def index
     render json: User.all
   end
+
   def create
     # Assemble and send request to Spotify for access and refresh tokens
     body = {
@@ -22,31 +23,31 @@ class Api::V1::UsersController < ApplicationController
     # convert response.body to json for assisgnment
     user_params = JSON.parse(user_response.body)
     # Create new user based on response, or find the existing user in database
-    @user = User.find_or_create_by(username: user_params["id"],
+    @user = User.find_or_create_by(spotify_id: user_params["id"],
                       spotify_url: user_params["external_urls"]["spotify"],
                       href: user_params["href"],
-                      uri: user_params["uri"])
+                      uri: user_params["uri"],
+                      username: user_params["display_name"])
+
     # Add or update user's profile image:
     img_url = user_params["images"][0] ? user_params["images"][0]["url"] : nil
     @user.update(profile_img_url: img_url)
     # Update the access and refresh tokens in the database
     @user.update(access_token:auth_params["access_token"], refresh_token: auth_params["refresh_token"])
+    if @user.artists.length == 0 || @user.tracks.length == 0
+      @user.user_spotify_data
+    end
+    redirect_to "http://localhost:3001?user_id=#{@user.id}"
+  end
 
-    redirect_to 'http://localhost:3001/app' 
-    # Create and send JWT Token for user
-    # payload = {user_id: @user.id}
-    # token = issue_token(payload)
-    # render json: {jwt: token, user: {
-    #                             username: @user.username,
-    #                             spotify_url: @user.spotify_url,
-    #                             profile_img_url: @user.profile_img_url
-    #                             }
-    #                           }
-    # # If user was just created and has no tracks saved, save them from Spotify
-    # # (creates a new thread to allow other requests to be made)
-    # if @user.tracks.empty?
-    #   @user.save_library
-    # end
+  def show
+    @user = User.find_by(id: params[:id])
+    render json: {jwt: encode_token({user_id: @user.id}), user: {
+      username: @user.username,
+      spotify_url: @user.spotify_url,
+      profile_img_url: @user.profile_img_url
+    }
+  }
   end
 
 end

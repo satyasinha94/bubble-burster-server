@@ -14,4 +14,5 @@ class Api::V1::AuthController < ApplicationController
    # scopes my app is requesting
    redirect_to "#{url}?#{query_params.to_query}"
  end
+
 end

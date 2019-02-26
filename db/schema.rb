@@ -53,7 +53,6 @@ ActiveRecord::Schema.define(version: 2019_02_20_160246) do
     t.string "spotify_id"
     t.string "preview_url"
     t.string "uri"
-    t.string "spotify_artist_id"
     t.integer "artist_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -76,13 +75,14 @@ ActiveRecord::Schema.define(version: 2019_02_20_160246) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "username"
+    t.string "spotify_id"
     t.string "access_token"
     t.string "refresh_token"
     t.string "spotify_url"
     t.string "profile_img_url"
     t.string "href"
     t.string "uri"
+    t.string "username"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

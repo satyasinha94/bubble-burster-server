@@ -1,7 +1,7 @@
 class User < ApplicationRecord
-  has_many :user_tracks
+  has_many :user_tracks, dependent: :destroy
   has_many :tracks, through: :user_tracks
-  has_many :user_artists
+  has_many :user_artists, dependent: :destroy
   has_many :artists, through: :user_artists
   has_many :genres, through: :artists
 
@@ -27,15 +27,15 @@ class User < ApplicationRecord
   end
 
   def user_spotify_data
-    User.first.refresh
-    User.first.my_artists
-    User.first.my_tracks
+    self.refresh
+    self.my_artists
+    self.my_tracks
   end
 
   def my_tracks
-    User.first.refresh
+    self.refresh
     header = {
-      Authorization: "Bearer #{User.first.access_token}"
+      Authorization: "Bearer #{self.access_token}"
     }
     user_response = RestClient.get("https://api.spotify.com/v1/me/top/tracks", header)
     list = JSON.parse(user_response.body)["items"]
@@ -43,9 +43,9 @@ class User < ApplicationRecord
   end
 
   def my_artists
-    User.first.refresh
+    self.refresh
     header = {
-      Authorization: "Bearer #{User.first.access_token}"
+      Authorization: "Bearer #{self.access_token}"
     }
     user_response = RestClient.get("https://api.spotify.com/v1/me/top/artists", header)
     list = JSON.parse(user_response.body)["items"]
