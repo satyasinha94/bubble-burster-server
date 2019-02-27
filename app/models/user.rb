@@ -66,7 +66,8 @@ class User < ApplicationRecord
       UserTrack.find_or_create_by(
         user_id: self.id,
         track_id: new_track.id,
-        popularity: track["popularity"]
+        popularity: track["popularity"],
+        username: self.username
       )
     end
   end
@@ -84,7 +85,8 @@ class User < ApplicationRecord
       UserArtist.find_or_create_by(
         user_id: self.id,
         artist_id: new_artist.id,
-        popularity: artist["popularity"]
+        popularity: artist["popularity"],
+        username: self.username
       )
       artist["genres"].map do |genre|
         new_genre = Genre.find_or_create_by(
