@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :user_artists, dependent: :destroy
   has_many :artists, through: :user_artists
   has_many :genres, through: :artists
+  has_many :recommendations
 
   def expired
     (Time.now - self.updated_at.localtime) > 3300
@@ -30,6 +31,8 @@ class User < ApplicationRecord
     self.refresh
     self.my_artists
     self.my_tracks
+    self.top_tracks_track_recs
+    self.top_artist_track_recs
   end
 
   def my_tracks
@@ -98,6 +101,53 @@ class User < ApplicationRecord
         )
       end
     end
+  end
+
+  def top_artist_track_recs
+    self.refresh
+    artist_ids = self.artists.map{|artist| artist.spotify_id}.take(5).join(",")
+    byebug
+    header = {
+      Authorization: "Bearer #{self.access_token}"
+    }
+    user_response = RestClient.get("https://api.spotify.com/v1/recommendations?market=US&seed_artists=#{artist_ids}", header)
+    list = JSON.parse(user_response.body)
+    list["tracks"].map do |data|
+      Recommendation.find_or_create_by(
+        user_id: self.id,
+        name: data["name"],
+        spotify_url: data["external_urls"]["spotify"],
+        href: data["href"],
+        spotify_id: data["id"],
+        preview_url: data["preview_url"],
+        uri: data["uri"],
+        artist_name: data["artists"][0]["name"],
+        popularity: data["popularity"]
+      )
+    end
+  end
+
+  def top_tracks_track_recs
+    self.refresh
+    track_ids = self.tracks.map{|track| track.spotify_id}.take(5).join(",")
+    header = {
+      Authorization: "Bearer #{self.access_token}"
+    }
+    user_response = RestClient.get("https://api.spotify.com/v1/recommendations?market=US&seed_tracks=#{track_ids}", header)
+    list = JSON.parse(user_response.body)
+    list["tracks"].map do |data|
+      Recommendation.find_or_create_by(
+        user_id: self.id,
+        name: data["name"],
+        spotify_url: data["external_urls"]["spotify"],
+        href: data["href"],
+        spotify_id: data["id"],
+        preview_url: data["preview_url"],
+        uri: data["uri"],
+        artist_name: data["artists"][0]["name"],
+        popularity: data["popularity"]
+      )
+      end
   end
 
 end

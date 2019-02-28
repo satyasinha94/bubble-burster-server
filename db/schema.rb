@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_20_160246) do
+ActiveRecord::Schema.define(version: 2019_02_27_161404) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -42,6 +42,20 @@ ActiveRecord::Schema.define(version: 2019_02_20_160246) do
 
   create_table "genres", force: :cascade do |t|
     t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "recommendations", force: :cascade do |t|
+    t.integer "user_id"
+    t.string "name"
+    t.string "spotify_url"
+    t.string "href"
+    t.string "spotify_id"
+    t.string "preview_url"
+    t.string "uri"
+    t.string "artist_name"
+    t.integer "popularity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
