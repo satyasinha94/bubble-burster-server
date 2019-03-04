@@ -45,9 +45,24 @@ class Api::V1::UsersController < ApplicationController
     render json: {jwt: encode_token({user_id: @user.id}), user: {
       username: @user.username,
       spotify_url: @user.spotify_url,
-      profile_img_url: @user.profile_img_url
+      profile_img_url: @user.profile_img_url,
+      access_token: @user.access_token,
+      refresh_token: @user.refresh_token,
+      expires_in: @user.expires_in
     }
   }
+  end
+
+  def logged_in
+    @user = curr_user
+    render json: {user: {
+      username: @user.username,
+      spotify_url: @user.spotify_url,
+      profile_img_url: @user.profile_img_url,
+      access_token: @user.access_token,
+      refresh_token: @user.refresh_token,
+      expires_in: @user.expires_in
+    }}
   end
 
 end

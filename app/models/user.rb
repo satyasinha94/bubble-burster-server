@@ -27,6 +27,10 @@ class User < ApplicationRecord
     end
   end
 
+  def expires_in
+    3300 - (Time.now - self.updated_at.localtime)
+  end
+
   def user_spotify_data
     self.refresh
     self.my_artists
@@ -105,8 +109,7 @@ class User < ApplicationRecord
 
   def top_artist_track_recs
     self.refresh
-    artist_ids = self.artists.map{|artist| artist.spotify_id}.take(5).join(",")
-    byebug
+    artist_ids = User.find(self.id).artists.map{|artist| artist.spotify_id}.sample(5).join(",")
     header = {
       Authorization: "Bearer #{self.access_token}"
     }
@@ -129,7 +132,7 @@ class User < ApplicationRecord
 
   def top_tracks_track_recs
     self.refresh
-    track_ids = self.tracks.map{|track| track.spotify_id}.take(5).join(",")
+    track_ids = self.tracks.map{|track| track.spotify_id}.sample(5).join(",")
     header = {
       Authorization: "Bearer #{self.access_token}"
     }

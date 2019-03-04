@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       resources :users
         get '/login', to: "auth#create"
         get '/callback', to: "users#create"
+        get '/logged_in', to: "users#logged_in"
     end
   end
 end
