@@ -103,6 +103,15 @@ class User < ApplicationRecord
           artist_id: new_artist.id,
           genre_id: new_genre.id
         )
+        ug = UserGenre.find_or_create_by(
+          popularity: artist["popularity"],
+          artist_count: 1,
+          user_id: self.id,
+          genre_id: new_genre.id,
+          username: self.username
+        )
+          ug.update(popularity: ug.popularity += artist["popularity"])
+          ug.update(artist_count: ug.artist_count += 1 )
       end
     end
   end
