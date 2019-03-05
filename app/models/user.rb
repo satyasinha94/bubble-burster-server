@@ -107,29 +107,6 @@ class User < ApplicationRecord
     end
   end
 
-  def top_artist_track_recs
-    self.refresh
-    artist_ids = User.find(self.id).artists.map{|artist| artist.spotify_id}.sample(5).join(",")
-    header = {
-      Authorization: "Bearer #{self.access_token}"
-    }
-    user_response = RestClient.get("https://api.spotify.com/v1/recommendations?market=US&seed_artists=#{artist_ids}", header)
-    list = JSON.parse(user_response.body)
-    list["tracks"].map do |data|
-      Recommendation.find_or_create_by(
-        user_id: self.id,
-        name: data["name"],
-        spotify_url: data["external_urls"]["spotify"],
-        href: data["href"],
-        spotify_id: data["id"],
-        preview_url: data["preview_url"],
-        uri: data["uri"],
-        artist_name: data["artists"][0]["name"],
-        popularity: data["popularity"]
-      )
-    end
-  end
-
   def top_tracks_track_recs
     self.refresh
     track_ids = self.tracks.map{|track| track.spotify_id}.sample(5).join(",")
@@ -151,6 +128,29 @@ class User < ApplicationRecord
         popularity: data["popularity"]
       )
       end
+  end
+
+  def top_artist_track_recs
+    self.refresh
+    artist_ids = User.find(self.id).artists.map{|artist| artist.spotify_id}.sample(5).join(",")
+    header = {
+      Authorization: "Bearer #{self.access_token}"
+    }
+    user_response = RestClient.get("https://api.spotify.com/v1/recommendations?market=US&seed_artists=#{artist_ids}", header)
+    list = JSON.parse(user_response.body)
+    list["tracks"].map do |data|
+      Recommendation.find_or_create_by(
+        user_id: self.id,
+        name: data["name"],
+        spotify_url: data["external_urls"]["spotify"],
+        href: data["href"],
+        spotify_id: data["id"],
+        preview_url: data["preview_url"],
+        uri: data["uri"],
+        artist_name: data["artists"][0]["name"],
+        popularity: data["popularity"]
+      )
+    end
   end
 
 end
