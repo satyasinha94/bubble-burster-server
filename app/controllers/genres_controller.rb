@@ -1,5 +1,5 @@
 class GenresController < ApplicationController
   def index
-    render json: Genre.all
+    render json: curr_user.genres
   end
 end

@@ -1,9 +1,10 @@
 class User < ApplicationRecord
-  has_many :user_tracks
+  has_many :user_tracks, dependent: :destroy
   has_many :tracks, through: :user_tracks
-  has_many :user_artists
+  has_many :user_artists, dependent: :destroy
   has_many :artists, through: :user_artists
   has_many :genres, through: :artists
+  has_many :recommendations
 
   def expired
     (Time.now - self.updated_at.localtime) > 3300
@@ -26,16 +27,22 @@ class User < ApplicationRecord
     end
   end
 
+  def expires_in
+    3300 - (Time.now - self.updated_at.localtime)
+  end
+
   def user_spotify_data
-    User.first.refresh
-    User.first.my_artists
-    User.first.my_tracks
+    self.refresh
+    self.my_artists
+    self.my_tracks
+    self.top_tracks_track_recs
+    self.top_artist_track_recs
   end
 
   def my_tracks
-    User.first.refresh
+    self.refresh
     header = {
-      Authorization: "Bearer #{User.first.access_token}"
+      Authorization: "Bearer #{self.access_token}"
     }
     user_response = RestClient.get("https://api.spotify.com/v1/me/top/tracks", header)
     list = JSON.parse(user_response.body)["items"]
@@ -43,9 +50,9 @@ class User < ApplicationRecord
   end
 
   def my_artists
-    User.first.refresh
+    self.refresh
     header = {
-      Authorization: "Bearer #{User.first.access_token}"
+      Authorization: "Bearer #{self.access_token}"
     }
     user_response = RestClient.get("https://api.spotify.com/v1/me/top/artists", header)
     list = JSON.parse(user_response.body)["items"]
@@ -66,7 +73,8 @@ class User < ApplicationRecord
       UserTrack.find_or_create_by(
         user_id: self.id,
         track_id: new_track.id,
-        popularity: track["popularity"]
+        popularity: track["popularity"],
+        username: self.username
       )
     end
   end
@@ -84,7 +92,8 @@ class User < ApplicationRecord
       UserArtist.find_or_create_by(
         user_id: self.id,
         artist_id: new_artist.id,
-        popularity: artist["popularity"]
+        popularity: artist["popularity"],
+        username: self.username
       )
       artist["genres"].map do |genre|
         new_genre = Genre.find_or_create_by(
@@ -95,6 +104,52 @@ class User < ApplicationRecord
           genre_id: new_genre.id
         )
       end
+    end
+  end
+
+  def top_tracks_track_recs
+    self.refresh
+    track_ids = self.tracks.map{|track| track.spotify_id}.sample(5).join(",")
+    header = {
+      Authorization: "Bearer #{self.access_token}"
+    }
+    user_response = RestClient.get("https://api.spotify.com/v1/recommendations?market=US&seed_tracks=#{track_ids}", header)
+    list = JSON.parse(user_response.body)
+    list["tracks"].map do |data|
+      Recommendation.find_or_create_by(
+        user_id: self.id,
+        name: data["name"],
+        spotify_url: data["external_urls"]["spotify"],
+        href: data["href"],
+        spotify_id: data["id"],
+        preview_url: data["preview_url"],
+        uri: data["uri"],
+        artist_name: data["artists"][0]["name"],
+        popularity: data["popularity"]
+      )
+      end
+  end
+
+  def top_artist_track_recs
+    self.refresh
+    artist_ids = User.find(self.id).artists.map{|artist| artist.spotify_id}.sample(5).join(",")
+    header = {
+      Authorization: "Bearer #{self.access_token}"
+    }
+    user_response = RestClient.get("https://api.spotify.com/v1/recommendations?market=US&seed_artists=#{artist_ids}", header)
+    list = JSON.parse(user_response.body)
+    list["tracks"].map do |data|
+      Recommendation.find_or_create_by(
+        user_id: self.id,
+        name: data["name"],
+        spotify_url: data["external_urls"]["spotify"],
+        href: data["href"],
+        spotify_id: data["id"],
+        preview_url: data["preview_url"],
+        uri: data["uri"],
+        artist_name: data["artists"][0]["name"],
+        popularity: data["popularity"]
+      )
     end
   end
 

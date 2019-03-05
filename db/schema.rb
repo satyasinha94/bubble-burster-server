@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_20_160246) do
+ActiveRecord::Schema.define(version: 2019_02_27_161404) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -46,6 +46,20 @@ ActiveRecord::Schema.define(version: 2019_02_20_160246) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "recommendations", force: :cascade do |t|
+    t.integer "user_id"
+    t.string "name"
+    t.string "spotify_url"
+    t.string "href"
+    t.string "spotify_id"
+    t.string "preview_url"
+    t.string "uri"
+    t.string "artist_name"
+    t.integer "popularity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "tracks", force: :cascade do |t|
     t.string "name"
     t.string "spotify_url"
@@ -53,7 +67,6 @@ ActiveRecord::Schema.define(version: 2019_02_20_160246) do
     t.string "spotify_id"
     t.string "preview_url"
     t.string "uri"
-    t.string "spotify_artist_id"
     t.integer "artist_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -63,6 +76,7 @@ ActiveRecord::Schema.define(version: 2019_02_20_160246) do
     t.integer "user_id"
     t.integer "artist_id"
     t.integer "popularity"
+    t.string "username"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -71,18 +85,20 @@ ActiveRecord::Schema.define(version: 2019_02_20_160246) do
     t.integer "user_id"
     t.integer "track_id"
     t.integer "popularity"
+    t.string "username"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "username"
+    t.string "spotify_id"
     t.string "access_token"
     t.string "refresh_token"
     t.string "spotify_url"
     t.string "profile_img_url"
     t.string "href"
     t.string "uri"
+    t.string "username"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

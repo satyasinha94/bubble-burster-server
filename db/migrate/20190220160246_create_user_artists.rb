@@ -4,7 +4,7 @@ class CreateUserArtists < ActiveRecord::Migration[5.2]
       t.integer :user_id
       t.integer :artist_id
       t.integer :popularity
-
+      t.string :username
       t.timestamps
     end
   end

@@ -1,5 +1,5 @@
 class TracksController < ApplicationController
   def index
-    render json: Track.all
+    render json: curr_user.tracks
   end
 end
