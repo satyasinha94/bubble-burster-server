@@ -37,6 +37,7 @@ class User < ApplicationRecord
     self.my_tracks
     self.top_tracks_track_recs
     self.top_artist_track_recs
+    self.genre_recs
   end
 
   def my_tracks
@@ -134,7 +135,8 @@ class User < ApplicationRecord
         preview_url: data["preview_url"],
         uri: data["uri"],
         artist_name: data["artists"][0]["name"],
-        popularity: data["popularity"]
+        popularity: data["popularity"],
+        album_cover: data["album"]["images"][0]["url"]
       )
       end
   end
@@ -157,7 +159,32 @@ class User < ApplicationRecord
         preview_url: data["preview_url"],
         uri: data["uri"],
         artist_name: data["artists"][0]["name"],
-        popularity: data["popularity"]
+        popularity: data["popularity"],
+        album_cover: data["album"]["images"][0]["url"]
+      )
+    end
+  end
+
+  def genre_recs
+    self.refresh
+    genres = self.genres.map{|genre| genre.name}.sample(5).join(",")
+    header = {
+      Authorization: "Bearer #{self.access_token}"
+    }
+    user_response = RestClient.get("https://api.spotify.com/v1/recommendations?market=US&seed_genres=#{genres}", header)
+    list = JSON.parse(user_response.body)
+    list["tracks"].map do |data|
+      Recommendation.find_or_create_by(
+        user_id: self.id,
+        name: data["name"],
+        spotify_url: data["external_urls"]["spotify"],
+        href: data["href"],
+        spotify_id: data["id"],
+        preview_url: data["preview_url"],
+        uri: data["uri"],
+        artist_name: data["artists"][0]["name"],
+        popularity: data["popularity"],
+        album_cover: data["album"]["images"][0]["url"]
       )
     end
   end

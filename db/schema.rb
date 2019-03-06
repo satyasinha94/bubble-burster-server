@@ -56,6 +56,7 @@ ActiveRecord::Schema.define(version: 2019_03_05_165949) do
     t.string "uri"
     t.string "artist_name"
     t.integer "popularity"
+    t.string "album_cover"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

@@ -10,6 +10,7 @@ class CreateRecommendations < ActiveRecord::Migration[5.2]
       t.string :uri
       t.string :artist_name
       t.integer :popularity
+      t.string :album_cover
       t.timestamps
     end
   end
