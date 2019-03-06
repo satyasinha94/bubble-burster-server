@@ -11,4 +11,8 @@ class RecommendationsController < ApplicationController
     render json: curr_user.top_tracks_track_recs.sample(20)
   end
 
+  def genres
+    render json: curr_user.genre_recs.sample(20)
+  end
+
 end

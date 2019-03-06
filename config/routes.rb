@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   resources :recommendations, only: [:index]
   get '/track_recs', to: "recommendations#tracks"
   get '/artist_recs', to: "recommendations#artists"
+  get '/genre_recs', to: "recommendations#genres"
   get '/current_user', to: "application#curr_user"
   namespace :api do
     namespace :v1 do
