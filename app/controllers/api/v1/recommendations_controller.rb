@@ -1,4 +1,4 @@
-class RecommendationsController < ApplicationController
+class Api::V1::RecommendationsController < ApplicationController
   def index
     render json: curr_user.recommendations.sample(20)
   end

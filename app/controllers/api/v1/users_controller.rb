@@ -65,4 +65,8 @@ class Api::V1::UsersController < ApplicationController
     }}
   end
 
+  def destroy
+    curr_user.destroy
+  end
+
 end
