@@ -10,7 +10,7 @@ class Api::V1::UsersController < ApplicationController
     body = {
       grant_type: "authorization_code",
       code: params[:code],
-      redirect_uri: ENV['REDIRECT_URI'],
+      redirect_uri: "https://bubble-burster-api.herokuapp.com/api/v1/callback",
       client_id: ENV['CLIENT_ID'],
       client_secret: ENV["CLIENT_SECRET"]
     }
