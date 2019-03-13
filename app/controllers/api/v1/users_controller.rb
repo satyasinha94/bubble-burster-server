@@ -39,7 +39,7 @@ class Api::V1::UsersController < ApplicationController
     if @user.artists.length == 0 || @user.tracks.length == 0
       @user.user_spotify_data
     end
-    redirect_to "https://bubble-burster-api.herokuapp.com?user_id=#{@user.id}"
+    redirect_to "https://bubble-burster.herokuapp.com?user_id=#{@user.id}"
   end
 
   def show
