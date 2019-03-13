@@ -5,7 +5,7 @@ class Api::V1::AuthController < ApplicationController
    query_params = {
      client_id: ENV['CLIENT_ID'],
      response_type: "code",
-     redirect_uri: ENV['REDIRECT_URI'],
+     redirect_uri: "https://bubble-burster-api.herokuapp.com/api/v1/callback",
      scope: "user-library-read user-library-modify user-top-read user-modify-playback-state playlist-modify-public playlist-modify-private ugc-image-upload user-read-recently-played streaming user-read-birthdate user-read-email user-read-private user-read-playback-state",
      show_dialog: true
    }
