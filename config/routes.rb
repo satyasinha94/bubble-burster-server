@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
-      resources :users
+      resources :users, only: [:index, :show]
       resources :genres, only: [:index]
       resources :tracks, only: [:index]
       resources :artists, only: [:index]
@@ -13,6 +13,7 @@ Rails.application.routes.draw do
       get '/artist_recs', to: "recommendations#artists"
       get '/genre_recs', to: "recommendations#genres"
       get '/current_user', to: "application#curr_user"
+      delete '/delete_user', to: "users#destroy"
     end
   end
 end
