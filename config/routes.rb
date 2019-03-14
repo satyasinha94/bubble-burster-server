@@ -13,6 +13,7 @@ Rails.application.routes.draw do
       get '/artist_recs', to: "recommendations#artists"
       get '/genre_recs', to: "recommendations#genres"
       get '/current_user', to: "application#curr_user"
+      get '/refresh', to: "users#refresh"
       delete '/delete_user', to: "users#destroy"
     end
   end

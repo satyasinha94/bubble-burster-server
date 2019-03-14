@@ -11,7 +11,6 @@ class User < ApplicationRecord
   end
 
   def refresh
-      if (expired)
         body = {
           grant_type: "refresh_token",
           refresh_token: self.refresh_token,
@@ -22,9 +21,6 @@ class User < ApplicationRecord
         auth_response = RestClient.post('https://accounts.spotify.com/api/token', body)
         auth_params = JSON.parse(auth_response)
         self.update(access_token: auth_params["access_token"])
-    else
-      puts "token still valid, time remaining: #{3300 - (Time.now - self.updated_at.localtime)}"
-    end
   end
 
   def expires_in

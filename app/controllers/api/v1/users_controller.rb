@@ -10,7 +10,7 @@ class Api::V1::UsersController < ApplicationController
     body = {
       grant_type: "authorization_code",
       code: params[:code],
-      redirect_uri: "https://bubble-burster-api.herokuapp.com/api/v1/callback",
+      redirect_uri: ENV['REDIRECT_URI'],
       client_id: ENV['CLIENT_ID'],
       client_secret: ENV["CLIENT_SECRET"]
     }
@@ -39,7 +39,7 @@ class Api::V1::UsersController < ApplicationController
     if @user.artists.length == 0 || @user.tracks.length == 0
       @user.user_spotify_data
     end
-    redirect_to "https://bubble-burster.herokuapp.com?user_id=#{@user.id}"
+    redirect_to "http://localhost:3001?user_id=#{@user.id}"
   end
 
   def show
@@ -65,6 +65,12 @@ class Api::V1::UsersController < ApplicationController
       refresh_token: @user.refresh_token,
       expires_in: @user.expires_in
     }}
+  end
+
+  def refresh
+    @user = curr_user
+    @user.refresh
+    render json: {access_token: @user.access_token}
   end
 
   def destroy
