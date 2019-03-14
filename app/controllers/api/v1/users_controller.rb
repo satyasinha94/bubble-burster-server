@@ -39,7 +39,8 @@ class Api::V1::UsersController < ApplicationController
     if @user.artists.length == 0 || @user.tracks.length == 0
       @user.user_spotify_data
     end
-    redirect_to "http://localhost:3001?user_id=#{@user.id}"
+    fe_url = ENV["CLIENT_URL"] + "?user_id=#{@user.id}"
+    redirect_to fe_url
   end
 
   def show
