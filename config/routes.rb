@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       get '/current_user', to: "application#curr_user"
       get '/refresh', to: "users#refresh"
       delete '/delete_user', to: "users#destroy"
+      get '/update_library', to: "users#update_library"
     end
   end
 end

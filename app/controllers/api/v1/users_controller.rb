@@ -78,4 +78,10 @@ class Api::V1::UsersController < ApplicationController
     curr_user.destroy
   end
 
+  def update_library
+    curr_user.artists.delete_all
+    curr_user.tracks.delete_all
+    curr_user.user_spotify_data
+  end
+
 end
