@@ -115,7 +115,8 @@ class User < ApplicationRecord
 
   def top_tracks_track_recs
     self.refresh
-    track_ids = self.tracks.map{|track| track.spotify_id}.sample(5).join(",")
+    #BUG - self.tracks returning empty array, using User.find as workaround. 
+    track_ids = User.find(self.id).tracks.map{|track| track.spotify_id}.sample(5).join(",")
     header = {
       Authorization: "Bearer #{self.access_token}"
     }
@@ -139,6 +140,7 @@ class User < ApplicationRecord
 
   def top_artist_track_recs
     self.refresh
+    #BUG - self.artists returning empty array, using User.find as workaround.
     artist_ids = User.find(self.id).artists.map{|artist| artist.spotify_id}.sample(5).join(",")
     header = {
       Authorization: "Bearer #{self.access_token}"

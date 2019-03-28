@@ -4,11 +4,11 @@ class Api::V1::RecommendationsController < ApplicationController
   end
 
   def tracks
-    render json: curr_user.top_artist_track_recs.sample(20)
+    render json: curr_user.top_tracks_track_recs.sample(20)
   end
 
   def artists
-    render json: curr_user.top_tracks_track_recs.sample(20)
+    render json: curr_user.top_artist_track_recs.sample(20)
   end
 
   def genres
