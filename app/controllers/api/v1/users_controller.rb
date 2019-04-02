@@ -35,7 +35,7 @@ class Api::V1::UsersController < ApplicationController
     img_url = user_params["images"][0] ? user_params["images"][0]["url"] : nil
     @user.update(profile_img_url: img_url)
     # Update the access and refresh tokens in the database
-    @user.update(access_token:auth_params["access_token"], refresh_token: auth_params["refresh_token"])
+    @user.update(access_token: auth_params["access_token"], refresh_token: auth_params["refresh_token"])
     if @user.artists.length == 0 || @user.tracks.length == 0
       @user.user_spotify_data
     end
@@ -50,7 +50,6 @@ class Api::V1::UsersController < ApplicationController
       spotify_url: @user.spotify_url,
       profile_img_url: @user.profile_img_url,
       access_token: @user.access_token,
-      refresh_token: @user.refresh_token,
       expires_in: @user.expires_in
     }
   }
@@ -63,7 +62,6 @@ class Api::V1::UsersController < ApplicationController
       spotify_url: @user.spotify_url,
       profile_img_url: @user.profile_img_url,
       access_token: @user.access_token,
-      refresh_token: @user.refresh_token,
       expires_in: @user.expires_in
     }}
   end

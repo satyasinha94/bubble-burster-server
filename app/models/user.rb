@@ -4,7 +4,7 @@ class User < ApplicationRecord
   has_many :user_artists, dependent: :destroy
   has_many :artists, through: :user_artists
   has_many :genres, through: :artists
-  has_many :recommendations
+  has_many :recommendations, dependent: :destroy
 
   def expired
     (Time.now - self.updated_at.localtime) > 3300
@@ -115,7 +115,7 @@ class User < ApplicationRecord
 
   def top_tracks_track_recs
     self.refresh
-    #BUG - self.tracks returning empty array, using User.find as workaround. 
+    #BUG - self.tracks returning empty array, using User.find as workaround.
     track_ids = User.find(self.id).tracks.map{|track| track.spotify_id}.sample(5).join(",")
     header = {
       Authorization: "Bearer #{self.access_token}"
