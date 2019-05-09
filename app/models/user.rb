@@ -11,16 +11,16 @@ class User < ApplicationRecord
   end
 
   def refresh
-        body = {
-          grant_type: "refresh_token",
-          refresh_token: self.refresh_token,
-          client_id: ENV['CLIENT_ID'],
-          client_secret: ENV["CLIENT_SECRET"]
-        }
-        # Send request and updated user's access_token
-        auth_response = RestClient.post('https://accounts.spotify.com/api/token', body)
-        auth_params = JSON.parse(auth_response)
-        self.update(access_token: auth_params["access_token"])
+    body = {
+      grant_type: "refresh_token",
+      refresh_token: self.refresh_token,
+      client_id: ENV['CLIENT_ID'],
+      client_secret: ENV["CLIENT_SECRET"]
+    }
+    # Send request and updated user's access_token
+    auth_response = RestClient.post('https://accounts.spotify.com/api/token', body)
+    auth_params = JSON.parse(auth_response)
+    self.update(access_token: auth_params["access_token"])
   end
 
   def expires_in
@@ -31,9 +31,6 @@ class User < ApplicationRecord
     self.refresh
     self.my_artists
     self.my_tracks
-    self.top_tracks_track_recs
-    self.top_artist_track_recs
-    self.genre_recs
   end
 
   def my_tracks
@@ -43,7 +40,7 @@ class User < ApplicationRecord
     }
     user_response = RestClient.get("https://api.spotify.com/v1/me/top/tracks", header)
     list = JSON.parse(user_response.body)["items"]
-    self.track_model(list)
+    Track.track_model(list, self)
   end
 
   def my_artists
@@ -53,132 +50,7 @@ class User < ApplicationRecord
     }
     user_response = RestClient.get("https://api.spotify.com/v1/me/top/artists", header)
     list = JSON.parse(user_response.body)["items"]
-    self.artist_model(list)
-  end
-
-  def track_model(tracks)
-    tracks.map do |track|
-      new_track = Track.find_or_create_by(
-        name: track["name"],
-        spotify_url: track["external_urls"]["spotify"],
-        href: track["href"],
-        spotify_id: track["id"],
-        preview_url: track["preview_url"],
-        uri: track["uri"],
-        artist_id: Artist.find_by(spotify_id: track["artists"][0]["id"]) === nil ? nil : Artist.find_by(spotify_id: track["artists"][0]["id"]).id
-      )
-      UserTrack.find_or_create_by(
-        user_id: self.id,
-        track_id: new_track.id,
-        popularity: track["popularity"],
-        username: self.username
-      )
-    end
-  end
-
-  def artist_model(artists)
-    artists.map do |artist|
-      new_artist = Artist.find_or_create_by(
-        name: artist["name"],
-        spotify_url: artist["external_urls"]["spotify"],
-        href: artist["href"],
-        spotify_id: artist["id"],
-        img_url: artist["images"][0]["url"],
-        uri: artist["uri"]
-      )
-      UserArtist.find_or_create_by(
-        user_id: self.id,
-        artist_id: new_artist.id,
-        popularity: artist["popularity"],
-        username: self.username
-      )
-      artist["genres"].map do |genre|
-        new_genre = Genre.find_or_create_by(
-          name: genre
-        )
-        ArtistGenre.find_or_create_by(
-          artist_id: new_artist.id,
-          genre_id: new_genre.id
-        )
-        ug = UserGenre.find_or_create_by(
-          popularity: artist["popularity"],
-          artist_count: 1,
-          user_id: self.id,
-          genre_id: new_genre.id,
-          username: self.username
-        )
-          ug.update(popularity: ug.popularity += artist["popularity"])
-          ug.update(artist_count: ug.artist_count += 1 )
-      end
-    end
-  end
-
-  def top_tracks_track_recs
-    self.refresh
-    #BUG - self.tracks returning empty array, using User.find as workaround.
-    track_ids = User.find(self.id).tracks.map{|track| track.spotify_id}.sample(5).join(",")
-    header = {
-      Authorization: "Bearer #{self.access_token}"
-    }
-    user_response = RestClient.get("https://api.spotify.com/v1/recommendations?market=US&seed_tracks=#{track_ids}", header)
-    list = JSON.parse(user_response.body)
-    list["tracks"].map do |data|
-      Recommendation.find_or_create_by(
-        user_id: self.id,
-        name: data["name"],
-        spotify_url: data["external_urls"]["spotify"],
-        spotify_id: data["id"],
-        uri: data["uri"],
-        artist_name: data["artists"][0]["name"],
-        popularity: data["popularity"],
-        album_cover: data["album"]["images"][0]["url"]
-      )
-      end
-  end
-
-  def top_artist_track_recs
-    self.refresh
-    #BUG - self.artists returning empty array, using User.find as workaround.
-    artist_ids = User.find(self.id).artists.map{|artist| artist.spotify_id}.sample(5).join(",")
-    header = {
-      Authorization: "Bearer #{self.access_token}"
-    }
-    user_response = RestClient.get("https://api.spotify.com/v1/recommendations?market=US&seed_artists=#{artist_ids}", header)
-    list = JSON.parse(user_response.body)
-    list["tracks"].map do |data|
-      Recommendation.find_or_create_by(
-        user_id: self.id,
-        name: data["name"],
-        spotify_url: data["external_urls"]["spotify"],
-        spotify_id: data["id"],
-        uri: data["uri"],
-        artist_name: data["artists"][0]["name"],
-        popularity: data["popularity"],
-        album_cover: data["album"]["images"][0]["url"]
-      )
-    end
-  end
-
-  def genre_recs
-    self.refresh
-    genres = self.genres.map{|genre| genre.name}.sample(5).join(",")
-    header = {
-      Authorization: "Bearer #{self.access_token}"
-    }
-    user_response = RestClient.get("https://api.spotify.com/v1/recommendations?market=US&seed_genres=#{genres}", header)
-    list = JSON.parse(user_response.body)
-    list["tracks"].map do |data|
-      Recommendation.find_or_create_by(
-        user_id: self.id,
-        name: data["name"],
-        spotify_url: data["external_urls"]["spotify"],
-        spotify_id: data["id"],
-        uri: data["uri"],
-        artist_name: data["artists"][0]["name"],
-        popularity: data["popularity"],
-        album_cover: data["album"]["images"][0]["url"]
-      )
-    end
+    Artist.artist_model(list, self)
   end
 
 end
